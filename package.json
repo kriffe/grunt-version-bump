@@ -1,0 +1,20 @@
+{
+  "name": "grunt-version-bump",
+  "version": "1.0.0-SNAPSHOT.1",
+  "description": "",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xl8/grunt-version-bump.git"
+  },
+  "author": "Idan Mittelpunkt",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xl8/grunt-version-bump/issues"
+  },
+  "homepage": "https://github.com/xl8/grunt-version-bump",
+  "dependencies": {
+    "grunt": "~0.4.5",
+    "detect-indent": "~0.1.3"
+  }
+}
