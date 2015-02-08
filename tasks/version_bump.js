@@ -15,7 +15,7 @@ module.exports = function(grunt) {
 
         _incrementableParts = grunt.config(_grunt_plugin_name)['versionStructure'] ?
             grunt.config(_grunt_plugin_name)['versionStructure'] :
-            JSON.parse(grunt.file.read(grunt.config(_grunt_plugin_name)['versionStructureFile']));
+            JSON.parse(grunt.file.read(grunt.config(_grunt_plugin_name)['versionStructureFile'] || 'defaultVersionStructure.json'));
 
         // take the incremenetable part from a provided argument or use the lowest-priority incrementable part
         var incrementable_part_name = this.args[0] || _incrementablePartsSortByField(null, "priority").slice(-1)[0]["name"];
