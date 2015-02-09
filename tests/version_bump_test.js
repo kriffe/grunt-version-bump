@@ -76,6 +76,9 @@ exports.version_bump_tester = {
             test.done();
         });
     },
+    /*
+        Test if major bump works well
+     */
     success_test5: function(test) {
         test.expect(1);
         callGruntfile('/mnt/trial/tests/success_test5.js', function (error, stdout, stderr) {
