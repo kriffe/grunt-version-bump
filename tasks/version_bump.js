@@ -2,9 +2,13 @@ module.exports = function(grunt) {
 
     var detectIndent = require('detect-indent');
 
-    var _version_field      = "version";
+    // the name of the plugin
     var _grunt_plugin_name  = "version_bump";
 
+    // the name of the field in the json object that describes the version string
+    var _version_field      = "version";
+
+    // array of objects, each describing an incrementable part
     var _incrementableParts = [];
 
     grunt.registerTask(_grunt_plugin_name, 'version bump', function() {
@@ -217,7 +221,7 @@ module.exports = function(grunt) {
     } // _parseVersion
 
     /*
-        increment a specific incrementable part and reset the rest (if resetable)
+        increment a specific incrementable part and reset the rest (if resettable)
         return the altered parsed_version
     */
     function _incrementIncrementablePart(parsed_version, incrementable_part_name) {
@@ -239,11 +243,11 @@ module.exports = function(grunt) {
         for (var i = priorityOfIncrementablePart + 1 ; i < sortedArr.length ; i++) {
             var val = sortedArr[i];
 
-            if (val['resetable'] || false) {
+            if (val['resettable'] || false) {
                 if (typeof(val['values']) !== "undefined") {
                     parsed_version[val['name']] = val['values'][0];
                 } else {
-                    parsed_version[val['name']] = val['resetTo'];
+                    parsed_version[val['name']] = val['resetTo'] || 0;
                 }
             }
         }
