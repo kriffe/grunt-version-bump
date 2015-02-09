@@ -7,10 +7,6 @@ module.exports = function(grunt) {
 
     grunt.initConfig({
 
-        version_bump: {
-            files: ['tests/tmp/fail_test1.json'],
-        },
-
         nodeunit: {
             tests: ['tests/*.js']
         },
@@ -18,7 +14,6 @@ module.exports = function(grunt) {
         clean: {
             test: ['tests/tmp']
         }
-
     });
 
     grunt.registerTask('copy', 'Copy fixtures to a temp location.', function() {
@@ -27,13 +22,8 @@ module.exports = function(grunt) {
 
     grunt.registerTask('test', [
         'copy',
-        'version_bump:major',
-        'version_bump:minor',
-        'version_bump:patch',
-        'version_bump:build',
-        'version_bump:phase',
-        'version_bump',
         'nodeunit',
-        'clean:test'
+        'clean'
     ]);
+    grunt.registerTask('default', ['test']);
 }
