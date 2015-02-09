@@ -8,7 +8,7 @@ module.exports = function(grunt) {
     grunt.initConfig({
 
         nodeunit: {
-            tests: ['tests/*.js']
+            tests: ['tests/*_test.js']
         },
 
         clean: {
@@ -18,12 +18,14 @@ module.exports = function(grunt) {
 
     grunt.registerTask('copy', 'Copy fixtures to a temp location.', function() {
         grunt.file.copy('tests/fixtures/fail_test1.json', 'tests/tmp/fail_test1.json');
+        grunt.file.copy('tests/fixtures/success_test1_version_structure.json', 'tests/tmp/success_test1_version_structure.json');
+        grunt.file.copy('tests/fixtures/success_test2.json', 'tests/tmp/success_test2.json');
+        grunt.file.copy('tests/fixtures/fail_test4.json', 'tests/tmp/fail_test4.json');
     });
 
     grunt.registerTask('test', [
         'copy',
-        'nodeunit',
-        'clean'
+        'nodeunit'
     ]);
     grunt.registerTask('default', ['test']);
 }

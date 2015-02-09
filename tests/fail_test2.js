@@ -1,13 +1,11 @@
-/*jslint node: true */
-'use strict';
 
 module.exports = function(grunt) {
-    var loader = require("./grunt-hacks.js");
-
     grunt.initConfig({
         // Configuration to be run (and then tested).
         version_bump: {
-            files: ['tests/tmp/fail_test1.json'],
+            files: [ __dirname + '/tmp/success_test2.json' ],
+            versionStructureFile: __dirname + '/tmp/success_test1_version_structure.json',
+            incrementType:   'popeye'
         }
     });
 

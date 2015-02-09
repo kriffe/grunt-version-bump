@@ -17,12 +17,10 @@ module.exports = function(grunt) {
         var configFiles = grunt.config(_grunt_plugin_name) ?  grunt.config(_grunt_plugin_name).files : ['package.json'];
         var files = Array.isArray(configFiles) ? configFiles : [configFiles];
 
-        _incrementableParts = grunt.config(_grunt_plugin_name)['versionStructure'] ?
-            grunt.config(_grunt_plugin_name)['versionStructure'] :
-            JSON.parse(grunt.file.read(grunt.config(_grunt_plugin_name)['versionStructureFile'] || 'defaultVersionStructure.json'));
+        _incrementableParts = _getIncrementableParts();
 
         // take the incremenetable part from a provided argument or use the lowest-priority incrementable part
-        var incrementable_part_name = this.args[0] || _incrementablePartsSortByField(null, "priority").slice(-1)[0]["name"];
+        var incrementable_part_name = this.args[0] || (grunt.config(_grunt_plugin_name) ? grunt.config(_grunt_plugin_name)['incrementType'] : false) || _incrementablePartsSortByField(null, "priority").slice(-1)[0]["name"];
 
         // check whether the incremenetable part is valid
         if ( _incrementablePartsToSimpleArray(null).indexOf(incrementable_part_name) === -1 ) {
@@ -78,6 +76,8 @@ module.exports = function(grunt) {
                 )
             );
 
+            grunt.log.ok('bumped from ' + version_string + ' to ' + file_content_json[_version_field]);
+
             // save the file with the altered json
             grunt.file.write(
                 file_path,
@@ -90,6 +90,18 @@ module.exports = function(grunt) {
 
         });
     }); // registerTask
+
+    function _getIncrementableParts() {
+        if ( grunt.config(_grunt_plugin_name) ) {
+            if ( grunt.config(_grunt_plugin_name)['versionStructure'] ) {
+                return grunt.config(_grunt_plugin_name)['versionStructure'];
+            }
+            if ( grunt.config(_grunt_plugin_name)['versionStructureFile'] ) {
+                return JSON.parse(grunt.file.read(grunt.config(_grunt_plugin_name)['versionStructureFile']));
+            }
+        }
+        return JSON.parse(grunt.file.read('defaultVersionStructure.json'));
+    }
 
     /*
         take an array of incrementable parts and sort it by the provided field name.

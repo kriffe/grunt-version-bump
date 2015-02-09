@@ -1,26 +1,21 @@
-var grunt = require('grunt');
-var cp = require('child_process'), command, options;
+'use strict';
 
-function callGruntfile(filename, callbacks) {
-    var comArg, options, child;
-    callbacks = callbacks || {};
+var cp = require("child_process"), command, options;
 
-    child = cp.fork('./tests/call-grunt.js', [filename], {silent: true});
+function callGruntfile(filename, whenDoneCallback) {
+    var command, options;
+    command = "grunt --gruntfile "+filename+" --no-color";
+    options = {cwd: __dirname};
+    cp.exec(command, options, whenDoneCallback);
+}
 
-    if (callbacks.onProcessError) {
-        child.on("error", callbacks.onProcessError);
-    }
-
-    if (callbacks.onProcessExit) {
-        child.on("exit", callbacks.onProcessExit);
-    }
-
-    if (callbacks.onStdout) {
-        child.stdout.on('data', callbacks.onStdout);
-    }
-    if (callbacks.onStderr) {
-        child.stderr.on('data', callbacks.onStderr);
-    }
+function callNpmInstallAndGruntfile(filename, whenDoneCallback) {
+    var command, options;
+    command = "npm install";
+    options = {cwd: __dirname};
+    cp.exec(command, {}, function(error, stdout, stderr) {
+        callGruntfile(filename, whenDoneCallback);
+    });
 }
 
 function contains(where, what) {
@@ -32,33 +27,60 @@ function containsWarning(buffer, warning) {
     return contains(buffer, 'Warning: Plugin failed: ' + warning);
 }
 
-exports.version_bump = {
+function getTypicalErrorMessage(error, stdout, stderr) {
+    return 'STDOUT: ' + stdout + ' STDERR: ' + stderr;
+}
+
+exports.version_bump_tester = {
     setUp: function(done) {
         // setup here if necessary
         done();
     },
-    pass: function(test) {
-        var wasPassMessage = false, callbacks;
-        test.expect(2);
-        callbacks = {
-            onProcessError: function(error) {
-                test.ok(false, "Unexpected error: " + error);
-                test.done();
-            },
-            onProcessExit: function(code, signal) {
-                test.equal(code, 0, "Exit code should have been 0");
-                test.ok(wasPassMessage, "Pass message was never sent ");
-                test.done();
-            },
-            onStdout: function(data) {
-                if (contains(data, 'Plugin worked correctly.')) {
-                    wasPassMessage = true;
-                }
-            },
-            onStderr: function(data) {
-                test.ok(false, "Stderr should have been empty: " + data);
-            }
-        };
-        callGruntfile('tests/gruntfile-pass.js', callbacks);
+    /*
+        Test when the json of the file to be bumped does not have an attribute called version
+     */
+    fail_test1: function(test) {
+        test.expect(1);
+        callGruntfile('/mnt/trial/tests/fail_test1.js', function (error, stdout, stderr) {
+            test.equal(contains(stdout, 'Couldn\'t find attribute version in the JSON parse'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.done();
+        });
+    },
+    /*
+        Test when an unsupported increment type is requested
+     */
+    fail_test2: function(test) {
+        test.expect(1);
+        callGruntfile('/mnt/trial/tests/fail_test2.js', function (error, stdout, stderr) {
+            test.equal(contains(stdout, 'Only these incrementable parts are supported'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.done();
+        });
+    },
+    /*
+        Test when a specified file to be bumped does not exist
+     */
+    fail_test3: function(test) {
+        test.expect(1);
+        callGruntfile('/mnt/trial/tests/fail_test3.js', function (error, stdout, stderr) {
+            test.equal(contains(stdout, 'not found'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.done();
+        });
+    },
+    /*
+        Test when the provided file to be bumped is not a valid JSON
+     */
+    fail_test4: function(test) {
+        test.expect(1);
+        callGruntfile('/mnt/trial/tests/fail_test4.js', function (error, stdout, stderr) {
+            test.equal(contains(stdout, 'Couldn\'t parse file'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.done();
+        });
+    },
+    success_test5: function(test) {
+        test.expect(1);
+        callGruntfile('/mnt/trial/tests/success_test5.js', function (error, stdout, stderr) {
+            test.equal(contains(stdout, 'Couldn\'t parse file'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.done();
+        });
     }
 };
