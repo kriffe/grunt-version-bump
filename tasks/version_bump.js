@@ -76,7 +76,7 @@ module.exports = function(grunt) {
                 )
             );
 
-            grunt.log.ok('bumped from ' + version_string + ' to ' + file_content_json[_version_field]);
+            grunt.log.ok('bumped [' + incrementable_part_name + '] from ' + version_string + ' to ' + file_content_json[_version_field]);
 
             // save the file with the altered json
             grunt.file.write(

@@ -79,7 +79,7 @@ exports.version_bump_tester = {
     success_test5: function(test) {
         test.expect(1);
         callGruntfile('/mnt/trial/tests/success_test5.js', function (error, stdout, stderr) {
-            test.equal(contains(stdout, 'Couldn\'t parse file'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.equal(contains(stdout, 'bumped [major] from 1.2.3-SNAPSHOT.4 to 2.0.0-SNAPSHOT.1'), true, getTypicalErrorMessage(error, stdout, stderr));
             test.done();
         });
     }
