@@ -50,18 +50,18 @@ The default version string structure pattern is
 Available increment types provided in the default version string strucutre:<br>
 Let's assume current version is 1.2.3-SNAPSHOT.4
 ```javascript
-    grunt version_bump:major // 2.0.0.SNAPSHOT.1
-    grunt version_bump:build // 2.0.0.SNAPSHOT.2
-    grunt version_bump:minor // 2.1.0.SNAPSHOT.1
-    grunt version_bump:build // 2.1.0.SNAPSHOT.2
-    grunt version_bump:patch // 2.1.1.SNAPSHOT.1
-    grunt version_bump:build // 2.1.1.SNAPSHOT.2
-    grunt version_bump:stage // 2.1.0.alpha.1
-    grunt version_bump:build // 2.1.0.alpha.2
-    grunt version_bump:stage // 2.1.0.beta.1
-    grunt version_bump:stage // 2.1.0.RELEASE.1
-    grunt version_bump:major --condition=stage:alpha // 2.1.0.RELEASE.1
-    grunt version_bump:major --condition=minor:1 // 2.2.0.RELEASE.1
+    grunt version_bump:major // 2.0.0~SNAPSHOT.1
+    grunt version_bump:build // 2.0.0~SNAPSHOT.2
+    grunt version_bump:minor // 2.1.0~SNAPSHOT.1
+    grunt version_bump:build // 2.1.0~SNAPSHOT.2
+    grunt version_bump:patch // 2.1.1~SNAPSHOT.1
+    grunt version_bump:build // 2.1.1~SNAPSHOT.2
+    grunt version_bump:stage // 2.1.0~alpha.1
+    grunt version_bump:build // 2.1.0~alpha.2
+    grunt version_bump:stage // 2.1.0~beta.1
+    grunt version_bump:stage // 2.1.0~RELEASE.1
+    grunt version_bump:major --condition=stage:alpha // 2.1.0~RELEASE.1
+    grunt version_bump:major --condition=minor:1 // 2.2.0~RELEASE.1
 ```
 As can be seen, bumping a part results in resetting all parts of lower priority. The priority order of the default version string strcuture is **major**, **minor**, **stage**, **patch**, **build**.
 
