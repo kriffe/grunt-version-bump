@@ -67,30 +67,48 @@ module.exports = function(grunt) {
                 grunt.fail.fatal(new Error("Couldn't find attribute version in the JSON parse of " + file_path));
             }
 
-            // alter the json object with a bumper version string
-            file_content_json[_version_field] = _stringifyVersion(
-                _incrementIncrementablePart(
-                    _parseVersion(
-                        version_string
-                    ),
-                    incrementable_part_name
-                )
-            );
+            var parsedVersion = _parseVersion(version_string);
 
-            grunt.log.ok('bumped [' + incrementable_part_name + '] from ' + version_string + ' to ' + file_content_json[_version_field]);
+            if (_checkConditionIfExists(parsedVersion, grunt.option('condition'))) {
+                // alter the json object with a bumper version string
+                file_content_json[_version_field] = _stringifyVersion(
+                    _incrementIncrementablePart(
+                        parsedVersion,
+                        incrementable_part_name
+                    )
+                );
 
-            // save the file with the altered json
-            grunt.file.write(
-                file_path,
-                JSON.stringify(
-                    file_content_json,
-                    null,
-                    indent
-                )
-            );
+                grunt.log.ok('bumped [' + incrementable_part_name + '] from ' + version_string + ' to ' + file_content_json[_version_field]);
 
+                // save the file with the altered json
+                grunt.file.write(
+                    file_path,
+                    JSON.stringify(
+                        file_content_json,
+                        null,
+                        indent
+                    )
+                );
+            } else {
+                grunt.log.ok('condition [' + grunt.option('condition') + '] was not met. skipping.');
+            }
         });
     }); // registerTask
+
+    /*
+        Check if a given condition is met
+     */
+    function _checkConditionIfExists(parsedVersion, condition) {
+        if (condition) {
+            var parts = condition.split(':');
+            if (parts.length == 2) {
+                if (parsedVersion[parts[0]] && (parsedVersion[parts[0]] != parts[1])) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
     /*
         return the incrementable parts array by loading it from config or from a file

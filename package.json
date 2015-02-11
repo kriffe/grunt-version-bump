@@ -1,6 +1,6 @@
 {
     "name": "grunt-version-bump",
-    "version": "10.0.0-beta.1",
+    "version": "1.0.0-RELEASE.1",
     "description": "",
     "main": "index.js",
     "repository": {
