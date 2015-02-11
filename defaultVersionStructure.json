@@ -23,7 +23,7 @@
     "name": "stage",
     "priority": 3,
     "order": 4,
-    "prefix": "~",
+    "prefix": ".",
     "values": ["SNAPSHOT", "alpha", "beta", "RELEASE"],
     "resettable": false
 }, {
