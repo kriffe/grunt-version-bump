@@ -17,10 +17,10 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('copy', 'Copy fixtures to a temp location.', function() {
-        grunt.file.copy('tests/fixtures/fail_test1.json', 'tests/tmp/fail_test1.json');
-        grunt.file.copy('tests/fixtures/success_test1_version_structure.json', 'tests/tmp/success_test1_version_structure.json');
-        grunt.file.copy('tests/fixtures/success_test2.json', 'tests/tmp/success_test2.json');
-        grunt.file.copy('tests/fixtures/fail_test4.json', 'tests/tmp/fail_test4.json');
+        grunt.file.copy('tests/fixtures/failure_json_with_no_version.json', 'tests/tmp/failure_json_with_no_version.json');
+        grunt.file.copy('tests/fixtures/failure_not_a_json.json', 'tests/tmp/failure_not_a_json.json');
+        grunt.file.copy('tests/fixtures/success_json_with_version.json', 'tests/tmp/success_json_with_version.json');
+        grunt.file.copy('tests/fixtures/success_version_structure.json', 'tests/tmp/success_version_structure.json');
     });
 
     grunt.registerTask('test', [

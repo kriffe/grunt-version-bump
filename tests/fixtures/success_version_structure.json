@@ -20,7 +20,7 @@
     "resettable": true,
     "resetTo": 0
 }, {
-    "name": "phase",
+    "name": "stage",
     "priority": 3,
     "order": 4,
     "prefix": "-",

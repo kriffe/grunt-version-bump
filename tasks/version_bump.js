@@ -153,7 +153,7 @@ module.exports = function(grunt) {
 
     /*
         calculates human-readable pattern based on the configured array of incrementable parts
-        e.g. "<major>.<minor>.<patch>-<phase>.<build>"
+        e.g. "<major>.<minor>.<patch>-<stage>.<build>"
     */
     function _calcPattern() {
 
