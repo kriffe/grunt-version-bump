@@ -1,6 +1,6 @@
 'use strict';
 
-var cp = require("child_process"), command, options;
+var grunt=require('/mnt/trial/node_modules/grunt'), cp = require("child_process"), command, options;
 
 function callGruntfile(filename, whenDoneCallback) {
     var command, options;
@@ -32,10 +32,24 @@ function getTypicalErrorMessage(error, stdout, stderr) {
 }
 
 exports.version_bump_tester = {
+
     setUp: function(done) {
-        // setup here if necessary
+        grunt.file.copy('tests/fixtures/failure_json_with_no_version.json', 'tests/tmp/failure_json_with_no_version.json');
+        grunt.file.copy('tests/fixtures/failure_not_a_json.json', 'tests/tmp/failure_not_a_json.json');
+        grunt.file.copy('tests/fixtures/success_json_with_version.json', 'tests/tmp/success_json_with_version.json');
+        grunt.file.copy('tests/fixtures/success_version_structure.json', 'tests/tmp/success_version_structure.json');
+        grunt.file.copy('tests/fixtures/failure_version_structure_missing_field.json', 'tests/tmp/failure_version_structure_missing_field.json');
+        grunt.file.copy('tests/fixtures/failure_version_structure_wrong_field_type.json', 'tests/tmp/failure_version_structure_wrong_field_type.json');
+        grunt.file.copy('tests/fixtures/failure_version_structure_non_consecutive_field_values.json', 'tests/tmp/failure_version_structure_non_consecutive_field_values.json');
+        grunt.file.copy('tests/fixtures/failure_version_structure_non_consecutive_field_values2.json', 'tests/tmp/failure_version_structure_non_consecutive_field_values2.json');
         done();
     },
+
+    tearDown: function(done) {
+        grunt.file.delete('tests/tmp', { force: true });
+        done();
+    },
+
     /*
         Test when the json of the file to be bumped does not have an attribute called version
      */
@@ -92,7 +106,7 @@ exports.version_bump_tester = {
     success_bump_minor: function(test) {
         test.expect(1);
         callGruntfile('/mnt/trial/tests/success_bump_minor.js', function (error, stdout, stderr) {
-            test.equal(contains(stdout, 'bumped [minor] from 2.0.0-SNAPSHOT.1 to 2.1.0-SNAPSHOT.1'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.equal(contains(stdout, 'bumped [minor] from 1.2.3-SNAPSHOT.4 to 1.3.0-SNAPSHOT.1'), true, getTypicalErrorMessage(error, stdout, stderr));
             test.done();
         });
     },
@@ -102,7 +116,7 @@ exports.version_bump_tester = {
     success_bump_patch: function(test) {
         test.expect(1);
         callGruntfile('/mnt/trial/tests/success_bump_patch.js', function (error, stdout, stderr) {
-            test.equal(contains(stdout, 'bumped [patch] from 2.1.0-SNAPSHOT.1 to 2.1.1-SNAPSHOT.1'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.equal(contains(stdout, 'bumped [patch] from 1.2.3-SNAPSHOT.4 to 1.2.4-SNAPSHOT.1'), true, getTypicalErrorMessage(error, stdout, stderr));
             test.done();
         });
     },
@@ -112,7 +126,7 @@ exports.version_bump_tester = {
     success_bump_stage: function(test) {
         test.expect(1);
         callGruntfile('/mnt/trial/tests/success_bump_stage.js', function (error, stdout, stderr) {
-            test.equal(contains(stdout, 'bumped [stage] from 2.1.1-SNAPSHOT.1 to 2.1.0-alpha.1'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.equal(contains(stdout, 'bumped [stage] from 1.2.3-SNAPSHOT.4 to 1.2.0-alpha.1'), true, getTypicalErrorMessage(error, stdout, stderr));
             test.done();
         });
     },
@@ -122,7 +136,47 @@ exports.version_bump_tester = {
     success_bump_build: function(test) {
         test.expect(1);
         callGruntfile('/mnt/trial/tests/success_bump_build.js', function (error, stdout, stderr) {
-            test.equal(contains(stdout, 'bumped [build] from 2.1.0-alpha.1 to 2.1.0-alpha.2'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.equal(contains(stdout, 'bumped [build] from 1.2.3-SNAPSHOT.4 to 1.2.3-SNAPSHOT.5'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.done();
+        });
+    },
+    /*
+     Test if the structure misses a mandatory field
+     */
+    fail_version_structure_missing_field: function(test) {
+        test.expect(1);
+        callGruntfile('/mnt/trial/tests/fail_version_structure_missing_field.js', function (error, stdout, stderr) {
+            test.equal(contains(stdout, 'invalid version structure: missing field name'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.done();
+        });
+    },
+    /*
+     Test if the structure has a field with incorrect type of value
+     */
+    fail_version_structure_wrong_field_type: function(test) {
+        test.expect(1);
+        callGruntfile('/mnt/trial/tests/fail_version_structure_wrong_field_type.js', function (error, stdout, stderr) {
+            test.equal(contains(stdout, 'invalid version structure: order field should be positive integer'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.done();
+        });
+    },
+    /*
+     Test if the structure has a field which should have consecutive values and it does not
+     */
+    fail_version_structure_non_consecutive_field_values1: function(test) {
+        test.expect(1);
+        callGruntfile('/mnt/trial/tests/fail_version_structure_non_consecutive_field_values.js', function (error, stdout, stderr) {
+            test.equal(contains(stdout, 'invalid version structure: priority field values should be consecutive'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.done();
+        });
+    },
+    /*
+     Test if the structure has a field which should have consecutive values and it does not
+     */
+    fail_version_structure_non_consecutive_field_values2: function(test) {
+        test.expect(1);
+        callGruntfile('/mnt/trial/tests/fail_version_structure_non_consecutive_field_values2.js', function (error, stdout, stderr) {
+            test.equal(contains(stdout, 'invalid version structure: priority field values should be consecutive'), true, getTypicalErrorMessage(error, stdout, stderr));
             test.done();
         });
     }

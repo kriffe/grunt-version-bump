@@ -18,6 +18,7 @@ module.exports = function(grunt) {
         var files = Array.isArray(configFiles) ? configFiles : [configFiles];
 
         _incrementableParts = _getIncrementableParts();
+        _testIncrementablePartsIntegrity();
 
         // take the incremenetable part from a provided argument or use the lowest-priority incrementable part
         var incrementable_part_name = this.args[0] || (grunt.config(_grunt_plugin_name) ? grunt.config(_grunt_plugin_name)['incrementType'] : false) || _incrementablePartsSortByField(null, "priority").slice(-1)[0]["name"];
@@ -91,6 +92,9 @@ module.exports = function(grunt) {
         });
     }); // registerTask
 
+    /*
+        return the incrementable parts array by loading it from config or from a file
+     */
     function _getIncrementableParts() {
         if ( grunt.config(_grunt_plugin_name) ) {
             if ( grunt.config(_grunt_plugin_name)['versionStructure'] ) {
@@ -101,7 +105,100 @@ module.exports = function(grunt) {
             }
         }
         return JSON.parse(grunt.file.read('defaultVersionStructure.json'));
-    }
+    } // _getIncrementableParts
+
+    /*
+        test incrementable parts array's integrity
+     */
+    function _testIncrementablePartsIntegrity() {
+
+        var arr         = _incrementableParts;
+        var arrLength   = arr.length;
+
+        // check structure and fill defaults
+        for (var i = 0 ; i < arrLength ; i++) {
+            var item = arr[i];
+            _testIncrementablePartsIntegrity_structureAndDefaults(item);
+            _testIncrementablePartsIntegrity_fieldTypes(item);
+            _testIncrementablePartsIntegrity_consecutive(item, arrLength, 'order', 1);
+            _testIncrementablePartsIntegrity_consecutive(item, arrLength, 'priority', 1);
+        }
+    } // _testIncrementablePartsIntegrity
+
+    /*
+        test that each incrementable part field exists or if possible set a default value
+     */
+    function _testIncrementablePartsIntegrity_structureAndDefaults(item) {
+        if (typeof item['name'] === 'undefined') {
+            grunt.fail.fatal(new Error('invalid version structure: missing field name'));
+        }
+        if (typeof item['priority'] === 'undefined') {
+            grunt.fail.fatal(new Error('invalid version structure: missing field priority'));
+        }
+        if (typeof item['order'] === 'undefined') {
+            grunt.fail.fatal(new Error('invalid version structure: missing field order'));
+        }
+        if (typeof item['prefix'] === 'undefined') {
+            item['prefix'] = ".";
+        }
+        if (typeof item['resettable'] === 'undefined') {
+            grunt.fail.fatal(new Error('invalid version structure: missing field resettable'));
+        }
+        if (typeof item['resetTo'] === 'undefined') {
+            item['resetTo'] = 0;
+        }
+    } // _testIncrementablePartsIntegrity_structureAndDefaults
+
+    /*
+        test incrementable part integrity related to the type of each field
+     */
+    function _testIncrementablePartsIntegrity_fieldTypes(item) {
+        if (typeof item['name'] !== 'string') {
+            grunt.fail.fatal(new Error('invalid version structure: name field should be string'));
+        }
+        if ((typeof item['priority'] !== 'number') || (item['priority'] <= 0)) {
+            grunt.fail.fatal(new Error('invalid version structure: priority field should be positive integer'));
+        }
+        if ((typeof item['order'] !== 'number') || (item['order'] <= 0)) {
+            grunt.fail.fatal(new Error('invalid version structure: order field should be positive integer'));
+        }
+        if (typeof item['prefix'] !== 'string') {
+            grunt.fail.fatal(new Error('invalid version structure: prefix field should be positive string'));
+        }
+        if (typeof item['resettable'] !== 'boolean') {
+            grunt.fail.fatal(new Error('invalid version structure: resettable field should be boolean'));
+        }
+        if ((typeof item['resetTo'] !== 'number') || (item['resetTo'] < 0)) {
+            grunt.fail.fatal(new Error('invalid version structure: resetTo field should be non-negative integer'));
+        }
+    } // _testIncrementablePartsIntegrity_fieldTypes
+
+    /*
+        test incrementable part integrity related to the consecutivity of the specific field
+     */
+    function _testIncrementablePartsIntegrity_consecutive(item, arrLength, field, startFrom) {
+        _testIncrementablePartsIntegrity_consecutive.obj = _testIncrementablePartsIntegrity_consecutive.obj || {};
+        _testIncrementablePartsIntegrity_consecutive.obj[field] = _testIncrementablePartsIntegrity_consecutive.obj[field] || {};
+        _testIncrementablePartsIntegrity_consecutive.obj[field]['counter'] = _testIncrementablePartsIntegrity_consecutive.obj[field]['counter'] || 0;
+
+        if (typeof _testIncrementablePartsIntegrity_consecutive.obj[field]['dict'] === "undefined") {
+            _testIncrementablePartsIntegrity_consecutive.obj[field]['dict'] = {};
+            for (var i = startFrom ; i <= startFrom -1 + arrLength ; i++) {
+                _testIncrementablePartsIntegrity_consecutive.obj[field]['dict'][i + ""] = false;
+            }
+        }
+
+        _testIncrementablePartsIntegrity_consecutive.obj[field].counter++;
+        if (typeof _testIncrementablePartsIntegrity_consecutive.obj[field]['dict'][item[field] + ''] === "undefined") {
+            grunt.fail.fatal(new Error('invalid version structure: ' + field + ' field values should be consecutive'))
+        }
+        if (_testIncrementablePartsIntegrity_consecutive.obj[field]['dict'][item[field] + ''] === false) {
+            _testIncrementablePartsIntegrity_consecutive.obj[field]['dict'][item[field] + ''] = true;
+        } else {
+            grunt.fail.fatal(new Error('invalid version structure: ' + field + ' field values should be consecutive'));
+        }
+    } // _testIncrementablePartsIntegrity_consecutive
+
 
     /*
         take an array of incrementable parts and sort it by the provided field name.
@@ -259,7 +356,7 @@ module.exports = function(grunt) {
                 if (typeof(val['values']) !== "undefined") {
                     parsed_version[val['name']] = val['values'][0];
                 } else {
-                    parsed_version[val['name']] = val['resetTo'] || 0;
+                    parsed_version[val['name']] = val['resetTo'];
                 }
             }
         }
