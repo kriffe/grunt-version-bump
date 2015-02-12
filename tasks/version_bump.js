@@ -122,7 +122,7 @@ module.exports = function(grunt) {
                 return JSON.parse(grunt.file.read(grunt.config(_grunt_plugin_name)['versionStructureFile']));
             }
         }
-        return JSON.parse(grunt.file.read('defaultVersionStructure.json'));
+        return JSON.parse(grunt.file.read(__dirname + '/../defaultVersionStructure.json'));
     } // _getIncrementableParts
 
     /*
