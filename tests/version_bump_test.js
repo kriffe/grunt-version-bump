@@ -23,6 +23,11 @@ function contains(where, what) {
     return index>-1;
 }
 
+function notcontains(where, what) {
+    var index = where.toString().indexOf(what);
+    return index==-1;
+}
+
 function containsWarning(buffer, warning) {
     return contains(buffer, 'Warning: Plugin failed: ' + warning);
 }
@@ -141,6 +146,46 @@ exports.version_bump_tester = {
         });
     },
     /*
+     Test if condition works well (positive)
+     */
+    success_condition: function(test) {
+        test.expect(1);
+        callGruntfile('success_condition.js', function (error, stdout, stderr) {
+            test.equal(contains(stdout, 'bumped [major] from 1.2.3-SNAPSHOT.4 to 2.0.0-SNAPSHOT.1'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.done();
+        });
+    },
+    /*
+     Test if input_version option works well
+     */
+    success_bump_build_inputversion: function(test) {
+        test.expect(1);
+        callGruntfile('success_bump_build_inputversion.js', function (error, stdout, stderr) {
+            test.equal(contains(stdout, 'bumped [build] from 2.95.4-alpha.105 to 2.95.4-alpha.106'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.done();
+        });
+    },
+    /*
+     Test if input_version option works well
+     */
+    success_bump_stage_inputversion_quiet: function(test) {
+        test.expect(1);
+        callGruntfile('success_bump_stage_inputversion_quiet.js', function (error, stdout, stderr) {
+            test.equal(notcontains(stdout, 'bumped [stage] from 2.95.4-alpha.105 to 2.95.0-beta.1'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.done();
+        });
+    },
+    /*
+     Test RETURN_VALUE
+     */
+    success_bump_build_inputversion_quiet_retval: function(test) {
+        test.expect(1);
+        callGruntfile('success_bump_build_inputversion_quiet_retval.js', function (error, stdout, stderr) {
+            test.equal(contains(stdout, 'RETURN_VALUE: 2.95.4-alpha.106'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.done();
+        });
+    },
+    /*
      Test if the structure misses a mandatory field
      */
     fail_version_structure_missing_field: function(test) {
@@ -179,5 +224,16 @@ exports.version_bump_tester = {
             test.equal(contains(stdout, 'invalid version structure: priority field values should be consecutive'), true, getTypicalErrorMessage(error, stdout, stderr));
             test.done();
         });
-    }
+    },
+    /*
+     Test if condition works well (negative)
+     */
+    fail_condition: function(test) {
+        test.expect(1);
+        callGruntfile('fail_condition.js', function (error, stdout, stderr) {
+            test.equal(contains(stdout, 'was not met. skipping.'), true, getTypicalErrorMessage(error, stdout, stderr));
+            test.done();
+        });
+    },
+
 };

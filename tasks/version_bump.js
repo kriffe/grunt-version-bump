@@ -11,6 +11,8 @@ module.exports = function(grunt) {
     // array of objects, each describing an incrementable part
     var _incrementableParts = [];
 
+    var external_options = {};
+
     grunt.registerTask(_grunt_plugin_name, 'version bump', function() {
 
         // the "return value"
@@ -19,11 +21,16 @@ module.exports = function(grunt) {
         // whether or not to read and write to a file
         var use_file = true;
 
-        if (grunt.option('input_version')) {
+        external_options['condition'] = grunt.option('condition') || grunt.config(_grunt_plugin_name)['condition'];
+        external_options['input_version'] = grunt.option('input_version') || grunt.config(_grunt_plugin_name)['input_version'];
+        external_options['quiet'] = grunt.option('quiet') || grunt.config(_grunt_plugin_name)['quiet'];
+
+        if (external_options['input_version']) {
             // when input_version option is set we use it as the version to bump, and we do not work with reading and writing to from/to files
             use_file = false;
-            var version_string = grunt.option('input_version');
+            var version_string = external_options['input_version'];
         }
+
 
         _incrementableParts = _getIncrementableParts();
         _testIncrementablePartsIntegrity();
@@ -82,7 +89,7 @@ module.exports = function(grunt) {
 
                 var parsedVersion = _parseVersion(version_string);
 
-                if (_checkConditionIfExists(parsedVersion, grunt.option('condition'))) {
+                if (_checkConditionIfExists(parsedVersion, external_options['condition'])) {
                     // alter the json object with a bumper version string
 
                     new_version_string = _stringifyVersion(
@@ -105,13 +112,13 @@ module.exports = function(grunt) {
                         )
                     );
                 } else {
-                    log('ok', 'condition [' + grunt.option('condition') + '] was not met. skipping.');
+                    log('ok', 'condition [' + external_options['condition'] + '] was not met. skipping.');
                 }
             });
         } else { // use_file === false
             var parsedVersion = _parseVersion(version_string);
 
-            if (_checkConditionIfExists(parsedVersion, grunt.option('condition'))) {
+            if (_checkConditionIfExists(parsedVersion, external_options['condition'])) {
 
                 new_version_string = _stringifyVersion(
                     _incrementIncrementablePart(
@@ -123,7 +130,7 @@ module.exports = function(grunt) {
                 log('ok', 'bumped [' + incrementable_part_name + '] from ' + version_string + ' to ' + new_version_string);
 
             } else {
-                log('ok', 'condition [' + grunt.option('condition') + '] was not met. skipping.');
+                log('ok', 'condition [' + external_options['condition'] + '] was not met. skipping.');
             }
         }
 
@@ -134,7 +141,8 @@ module.exports = function(grunt) {
         Log a message to the console
      */
     function log(level, message) {
-        if (! grunt.option('quiet') ) {
+
+        if (! external_options['quiet'] ) {
             grunt.log[level](message);
         }
     }
