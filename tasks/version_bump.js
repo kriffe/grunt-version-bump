@@ -13,9 +13,17 @@ module.exports = function(grunt) {
 
     grunt.registerTask(_grunt_plugin_name, 'version bump', function() {
 
-        // take the files to bump
-        var configFiles = grunt.config(_grunt_plugin_name) ?  grunt.config(_grunt_plugin_name).files : ['package.json'];
-        var files = Array.isArray(configFiles) ? configFiles : [configFiles];
+        // the "return value"
+        var new_version_string = "";
+
+        // whether or not to read and write to a file
+        var use_file = true;
+
+        if (grunt.option('input_version')) {
+            // when input_version option is set we use it as the version to bump, and we do not work with reading and writing to from/to files
+            use_file = false;
+            var version_string = grunt.option('input_version');
+        }
 
         _incrementableParts = _getIncrementableParts();
         _testIncrementablePartsIntegrity();
@@ -30,70 +38,106 @@ module.exports = function(grunt) {
             );
         }
 
-        // filter out files that do no exist
-        files.filter(function(file_path) {
-            // Remove nonexistent files.
-            if (!grunt.file.exists(file_path)) {
-                grunt.log.warn('File "' + file_path.cyan + '" not found.');
-                return false;
-            } else {
-                return true;
-            }
-        })
-        // iterate over the rest
-        .forEach(function(file_path) {
+        if (use_file) {
+            // take the files to bump
+            var configFiles = grunt.config(_grunt_plugin_name) ?  grunt.config(_grunt_plugin_name).files : ['package.json'];
+            var files = Array.isArray(configFiles) ? configFiles : [configFiles];
 
-            // get file content
-            try {
-                var file_content = grunt.file.read(file_path);
-            } catch(err) {
-                grunt.fail.fatal(new Error("Couldn't read " + file_path + ". Error: " + err.message));
-            }
+            // filter out files that do no exist
+            files.filter(function(file_path) {
+                // Remove nonexistent files.
+                if (!grunt.file.exists(file_path)) {
+                    log('warn', 'File "' + file_path.cyan + '" not found.');
+                    return false;
+                } else {
+                    return true;
+                }
+            })
+            // iterate over the rest
+            .forEach(function(file_path) {
 
-            // used to persist the indentation when modifying a file
-            var indent = detectIndent(file_content) || '    ';
+                // get file content
+                try {
+                    var file_content = grunt.file.read(file_path);
+                } catch(err) {
+                    grunt.fail.fatal(new Error("Couldn't read " + file_path + ". Error: " + err.message));
+                }
 
-            // parse file content as a JSON
-            try {
-                var file_content_json = JSON.parse(file_content);
-            } catch(err) {
-                grunt.fail.fatal(new Error("Couldn't parse file (" + file_path + ") as JSON. Error: " + err.message));
-            }
+                // used to persist the indentation when modifying a file
+                var indent = detectIndent(file_content) || '    ';
 
-            // extract version string
-            var version_string = file_content_json[_version_field];
+                // parse file content as a JSON
+                try {
+                    var file_content_json = JSON.parse(file_content);
+                } catch(err) {
+                    grunt.fail.fatal(new Error("Couldn't parse file (" + file_path + ") as JSON. Error: " + err.message));
+                }
 
-            if (typeof(version_string) === "undefined") {
-                grunt.fail.fatal(new Error("Couldn't find attribute version in the JSON parse of " + file_path));
-            }
+                // extract version string
+                var version_string = file_content_json[_version_field];
 
+                if (typeof(version_string) === "undefined") {
+                    grunt.fail.fatal(new Error("Couldn't find attribute version in the JSON parse of " + file_path));
+                }
+
+                var parsedVersion = _parseVersion(version_string);
+
+                if (_checkConditionIfExists(parsedVersion, grunt.option('condition'))) {
+                    // alter the json object with a bumper version string
+
+                    new_version_string = _stringifyVersion(
+                        _incrementIncrementablePart(
+                            parsedVersion,
+                            incrementable_part_name
+                        )
+                    );
+                    file_content_json[_version_field] = new_version_string;
+
+                    log('ok', 'bumped [' + incrementable_part_name + '] from ' + version_string + ' to ' + file_content_json[_version_field]);
+
+                    // save the file with the altered json
+                    grunt.file.write(
+                        file_path,
+                        JSON.stringify(
+                            file_content_json,
+                            null,
+                            indent
+                        )
+                    );
+                } else {
+                    log('ok', 'condition [' + grunt.option('condition') + '] was not met. skipping.');
+                }
+            });
+        } else { // use_file === false
             var parsedVersion = _parseVersion(version_string);
 
             if (_checkConditionIfExists(parsedVersion, grunt.option('condition'))) {
-                // alter the json object with a bumper version string
-                file_content_json[_version_field] = _stringifyVersion(
+
+                new_version_string = _stringifyVersion(
                     _incrementIncrementablePart(
                         parsedVersion,
                         incrementable_part_name
                     )
                 );
 
-                grunt.log.ok('bumped [' + incrementable_part_name + '] from ' + version_string + ' to ' + file_content_json[_version_field]);
+                log('ok', 'bumped [' + incrementable_part_name + '] from ' + version_string + ' to ' + new_version_string);
 
-                // save the file with the altered json
-                grunt.file.write(
-                    file_path,
-                    JSON.stringify(
-                        file_content_json,
-                        null,
-                        indent
-                    )
-                );
             } else {
-                grunt.log.ok('condition [' + grunt.option('condition') + '] was not met. skipping.');
+                log('ok', 'condition [' + grunt.option('condition') + '] was not met. skipping.');
             }
-        });
+        }
+
+        grunt.log.ok("RETURN_VALUE: " + new_version_string);
     }); // registerTask
+
+    /*
+        Log a message to the console
+     */
+    function log(level, message) {
+        if (! grunt.option('quiet') ) {
+            grunt.log[level](message);
+        }
+    }
 
     /*
         Check if a given condition is met
