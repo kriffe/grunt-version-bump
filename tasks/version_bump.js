@@ -21,9 +21,9 @@ module.exports = function(grunt) {
         // whether or not to read and write to a file
         var use_file = true;
 
-        external_options['condition'] = grunt.option('condition') || grunt.config(_grunt_plugin_name) ? grunt.config(_grunt_plugin_name)['condition'] : undefined;
-        external_options['input_version'] = grunt.option('input_version') || grunt.config(_grunt_plugin_name) ? grunt.config(_grunt_plugin_name)['input_version'] : undefined;
-        external_options['quiet'] = grunt.option('quiet') || grunt.config(_grunt_plugin_name) ? grunt.config(_grunt_plugin_name)['quiet'] : undefined;
+        external_options['condition'] = grunt.option('condition') || (grunt.config(_grunt_plugin_name) ? grunt.config(_grunt_plugin_name)['condition'] : undefined);
+        external_options['input_version'] = grunt.option('input_version') || (grunt.config(_grunt_plugin_name) ? grunt.config(_grunt_plugin_name)['input_version'] : undefined);
+        external_options['quiet'] = grunt.option('quiet') || (grunt.config(_grunt_plugin_name) ? grunt.config(_grunt_plugin_name)['quiet'] : undefined);
 
         if (external_options['input_version']) {
             // when input_version option is set we use it as the version to bump, and we do not work with reading and writing to from/to files
