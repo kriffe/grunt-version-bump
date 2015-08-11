@@ -135,6 +135,7 @@ module.exports = function(grunt) {
         }
 
         grunt.log.ok("RETURN_VALUE: " + new_version_string);
+        grunt.config(_grunt_plugin_name).callback(new_version_string);
     }); // registerTask
 
     /*
