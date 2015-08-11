@@ -235,5 +235,14 @@ exports.version_bump_tester = {
             test.done();
         });
     },
-
+    /*
+    Test if callback function returns correct value
+     */
+    success_bump_returns_correct_version: function(test) {
+        test.expect(1);
+        callGruntfile('success_bump_minor_with_callback.js', function (error, stdout, stderr) {
+          test.equal(contains(stdout, 'Returned from callback function: 1.3.0-SNAPSHOT.1'), true, getTypicalErrorMessage(error, stdout, stderr));
+          test.done();
+        });
+    }
 };

@@ -124,6 +124,11 @@ Type: `Array`
 
 Array of strings ordered by priority of possible values for that part if numbers are not good enough.
 
+#### callback
+Type: `Function`
+
+Callback function after successfully job, in parameter is set name of new version.
+
 ### Command Line Options
 #### condition
 Type `String:String`
