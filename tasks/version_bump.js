@@ -135,6 +135,15 @@ module.exports = function(grunt) {
         }
 
         grunt.log.ok("RETURN_VALUE: " + new_version_string);
+	
+	//Do internal update of grunt.pkg for complex build commands
+	if (grunt.config.data.pkg !== undefined){
+		grunt.config.data.pkg.version = new_version_string;	
+		grunt.log.ok("INTERNAL_UPDATE: Internal pkg updated");
+	}
+	else{
+		grunt.log.ok("INTERNAL_UPDATE: No update..");
+	}
         //grunt.config(_grunt_plugin_name).callback(new_version_string);
     }); // registerTask
 
